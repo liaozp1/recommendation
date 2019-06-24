@@ -44,6 +44,7 @@ def transfer2int(r, dataSet):
 
 
 def gen_rules(filepath, args):
+# def gen_rules(filepath):
     if not os.path.exists(filepath):
         print(filepath, 'not exists,please set the filepath')
     print('\n\n\n')
@@ -71,6 +72,7 @@ def gen_rules(filepath, args):
     # print('frozenDataSet：', frozenDataSet)
     ###构建树
     support_num = args.support*len(dataSet)  ###支持数=支持度*交易数目
+    # support_num = 20000
     fptree, headPointTable = fpgrowth.createFPTree(frozenDataSet, support_num)
     ###挖掘树
     frequentPatterns = {}
@@ -81,8 +83,9 @@ def gen_rules(filepath, args):
     # print(len(frequentPatterns))
     rules = []
     fpgrowth.rulesGenerator(frequentPatterns, args.confidence, rules)
+    # fpgrowth.rulesGenerator(frequentPatterns, 0.7, rules)
     #取后件为1的rules
-    # print(rules)
+    print(rules)
     filter_rules = [rule for rule in rules if len(rule[1]) == 1]
     filter_rules = sorted(filter_rules, key=lambda p: p[2], reverse=True)
     print('number of association rules:\n', len(filter_rules))
@@ -117,22 +120,24 @@ def write2redis(r, rules,filepath):
 
 if __name__=='__main__':
     start = time.time()
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--type', help='gennerate LAR or SAR', type=str, default='long', required=True)
-    parser.add_argument('--dir', help='file directory', type=str, default= \
-                        "D:/work/FPgrowth-master/FPgrowth-master/data/orders/longterm/stores/", required=True)
-    parser.add_argument('-s', '--support', help='support', type=float, default=0.1, required=True)
-    parser.add_argument('-c', '--confidence', help='confidence', type=float, default=0.7, required=True)
-    args = parser.parse_args()
-    # print(args)
-    # host是redis主机，需要redis服务端和客户端都起着 redis默认端口是6379
-    pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
-    r = redis.Redis(connection_pool=pool)
-
-    store_files = [file for file in os.listdir(args.dir)]  ##多个文件
-    for filename in store_files:
-        store_file = os.path.join(args.dir, filename)
-        # print('store_file:', store_file)
-        rules = gen_rules(store_file, args)
-        write2redis(r, rules, store_file)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--type', help='gennerate LAR or SAR', type=str, default='long', required=True)
+    # parser.add_argument('--dir', help='file directory', type=str, default= \
+    #                     "D:/work/FPgrowth-master/FPgrowth-master/data/orders/longterm/stores/", required=True)
+    # parser.add_argument('-s', '--support', help='support', type=float, default=0.1, required=True)
+    # parser.add_argument('-c', '--confidence', help='confidence', type=float, default=0.7, required=True)
+    # args = parser.parse_args()
+    # # print(args)
+    # # host是redis主机，需要redis服务端和客户端都起着 redis默认端口是6379
+    # pool = redis.ConnectionPool(host='localhost', port=6379, decode_responses=True)
+    # r = redis.Redis(connection_pool=pool)
+    #
+    # store_files = [file for file in os.listdir(args.dir)]  ##多个文件
+    # for filename in store_files:
+    #     store_file = os.path.join(args.dir, filename)
+    #     # print('store_file:', store_file)
+    #     rules = gen_rules(store_file, args)
+    #     write2redis(r, rules, store_file)
+    filepath='./fpgrowth/data/kosarak.dat'
+    rules=gen_rules(filepath)
     print(time.time() - start, 'sec')
